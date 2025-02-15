@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 55b79423c50671047baec88a064054bf
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - prefabDisparo: {fileID: 2324205247770700288, guid: 168aef96a50a8a9448420fe349858ff0, type: 3}
+  - puntoPartida: {instanceID: 0}
+  - animator: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
