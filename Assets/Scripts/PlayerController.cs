@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     //public Animator animator;
     private Vector2 velocidadActual;
 
+    public GameObject Head;  
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -52,22 +53,42 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey("a"))
         {
             gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * -1000f * Time.deltaTime, 0));
+            Head.GetComponent<Animator>().SetBool("lookright", false);
+            Head.GetComponent<Animator>().SetBool("lookup", false);
+            Head.GetComponent<Animator>().SetBool("lookdown", false);
+            Head.GetComponent<Animator>().SetBool("lookleft", true);
         }
 
         if (Input.GetKey("d"))
         {
             gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * 1000f * Time.deltaTime, 0));
+            Head.GetComponent<Animator>().SetBool("lookdown", false);
+            Head.GetComponent<Animator>().SetBool("lookup", false);
+            Head.GetComponent<Animator>().SetBool("lookleft", false);
+            Head.GetComponent<Animator>().SetBool("lookright", true);
         }
+
 
         if (Input.GetKey("w"))
         {
             gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * 1000f * Time.deltaTime));
+            Head.GetComponent<Animator>().SetBool("lookdown", false);
+            Head.GetComponent<Animator>().SetBool("lookright", false);
+            Head.GetComponent<Animator>().SetBool("lookleft", false);
+            Head.GetComponent<Animator>().SetBool("lookup", true);
         }
+
 
         if (Input.GetKey("s"))
         {
             gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * -1000f * Time.deltaTime));
+            Head.GetComponent<Animator>().SetBool("lookup", false);
+            Head.GetComponent<Animator>().SetBool("lookright", false);
+            Head.GetComponent<Animator>().SetBool("lookleft", false);
+            Head.GetComponent<Animator>().SetBool("lookdown", true);
         }
+
+
     }
 
 

@@ -49,8 +49,14 @@ public class VidaJugador : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
+        
+            if (Input.GetKey("r"))
+            {
+                Debug.Log("Reset");
+                ReiniciarEscena();
+            }
         
     }
 }

@@ -6,6 +6,7 @@ public class PlayerShoot : MonoBehaviour
     public GameObject puntoPartida;
     public float cooldown = 1f;
 
+
     private float tiempoUltimoDisparo;
     public Animator animator;
     void Start()
