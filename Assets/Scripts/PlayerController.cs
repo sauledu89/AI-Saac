@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float speedMultiplier = 5f;
     [SerializeField]
-   // int hearts = 6;
+    // int hearts = 6;
 
     public float suavizado = 0.1f;
     //public Animator animator;
@@ -47,67 +47,71 @@ public class PlayerController : MonoBehaviour
         //GetKey detecta todo el tiempo mientras se presiona la tecla
         //GetKeyDown 1 vez detecta por pulsación 
 
-        /* 1ra versión del código de movimiento
+        // 1ra versión del código de movimiento
 
-               if (Input.GetKey("a"))
-               {
-                   gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * -1000f * Time.deltaTime, 0));
-               }
+        if (Input.GetKey("a"))
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * -1000f * Time.deltaTime, 0));
+        }
 
-               if (Input.GetKey("d"))
-               {
-                   gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * 1000f * Time.deltaTime, 0));
-               }
+        if (Input.GetKey("d"))
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(speedMultiplier * 1000f * Time.deltaTime, 0));
+        }
 
-               if (Input.GetKey("w"))
-               {
-                   gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * 1000f * Time.deltaTime));
-               }
+        if (Input.GetKey("w"))
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * 1000f * Time.deltaTime));
+        }
 
-               if (Input.GetKey("s"))
-               {
-                   gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * -1000f * Time.deltaTime));
-               }
-               }
-       */
-
-        float inputHorizontal = Input.GetAxis("Horizontal");
-        float inputVertical = Input.GetAxis("Vertical");
-        Vector2 direccionDeseada = new Vector2(inputHorizontal, inputVertical).normalized;
-        Vector2 direccionSuavizada = Vector2.Lerp(velocidadActual, direccionDeseada, suavizado);
-        MoverObjeto(direccionSuavizada);
-        //ActualizarAnimaciones(direccionSuavizada.x, direccionSuavizada.y);
-        velocidadActual = direccionSuavizada;
-
+        if (Input.GetKey("s"))
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, speedMultiplier * -1000f * Time.deltaTime));
+        }
     }
-    void MoverObjeto(Vector2 direccion)
-    {
-        Vector2 desplazamiento = direccion * speedMultiplier * Time.deltaTime;
-        transform.Translate(desplazamiento);
-    }
+
+
     /*
-        void ActualizarAnimaciones(float inputHorizontal, float inputVertical)
-        {
-            animator.SetFloat("Horizontal", inputHorizontal);
-            animator.SetFloat("vertical", inputVertical);
+            Otra versión del código de movimiento
+     
+            float inputHorizontal = Input.GetAxis("Horizontal");
+            float inputVertical = Input.GetAxis("Vertical");
+            Vector2 direccionDeseada = new Vector2(inputHorizontal, inputVertical).normalized;
+            Vector2 direccionSuavizada = Vector2.Lerp(velocidadActual, direccionDeseada, suavizado);
+            MoverObjeto(direccionSuavizada);
+            //ActualizarAnimaciones(direccionSuavizada.x, direccionSuavizada.y);
+            velocidadActual = direccionSuavizada;
+
         }
 
-
-        //En el rigidBody Corregimos detalles modificando linear drag y masa en el inspector
-        //linear drag indica que tan rápido se frenan sus fuerzas de movimiento
-        //Angular drag es lo mismo pero para fuerzas angulares
-        //Si modificamos las collision detection de discretas a continuas, el motor checará si entre las actualizaciones
-        //frame por frame, cambió algo drásticamente y corregirá lo que tenga que corregir, útil en caso de que haya cambios 
-        //ocurriendo muy rápido entre frames, recalculará las físicas para arreglarlo.
-        private void OnCollisionEnter2D(Collision2D collision)
+        void MoverObjeto(Vector2 direccion)
         {
-            if (collision.transform.tag == "Enemy")
+            Vector2 desplazamiento = direccion * speedMultiplier * Time.deltaTime;
+            transform.Translate(desplazamiento);
+        }
+
+            void ActualizarAnimaciones(float inputHorizontal, float inputVertical)
             {
-                Heartache();
+                animator.SetFloat("Horizontal", inputHorizontal);
+                animator.SetFloat("vertical", inputVertical);
             }
-        }
 
-    */
+
+            //En el rigidBody Corregimos detalles modificando linear drag y masa en el inspector
+            //linear drag indica que tan rápido se frenan sus fuerzas de movimiento
+            //Angular drag es lo mismo pero para fuerzas angulares
+            //Si modificamos las collision detection de discretas a continuas, el motor checará si entre las actualizaciones
+            //frame por frame, cambió algo drásticamente y corregirá lo que tenga que corregir, útil en caso de que haya cambios 
+            //ocurriendo muy rápido entre frames, recalculará las físicas para arreglarlo.
+            private void OnCollisionEnter2D(Collision2D collision)
+            {
+                if (collision.transform.tag == "Enemy")
+                {
+                    Heartache();
+                }
+            }
+
+        */
 
 
 

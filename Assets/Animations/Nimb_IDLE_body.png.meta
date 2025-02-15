@@ -1,16 +1,13 @@
 fileFormatVersion: 2
-guid: 7fe40469bd02c934a86e58da55301c79
+guid: 27c67d0b0b8c8e04abcd3df644948cf0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3089805966375108791
-    second: Heartless_0
+      213: -6832377497278251568
+    second: Nimb_IDLE_body_0
   - first:
-      213: 2021224999896640088
-    second: Heartless_1
-  - first:
-      213: -6782078578099912010
-    second: Heartless_2
+      213: -4501348477548605362
+    second: Nimb_IDLE_body_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +49,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -106,35 +103,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Heartless_0
+      name: Nimb_IDLE_body_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 5
-        width: 10
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7b0cbaae72231ea20800000000000000
-      internalID: 3089805966375108791
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Heartless_1
-      rect:
-        serializedVersion: 2
-        x: 4
+        x: 3
         y: 0
-        width: 8
-        height: 6
+        width: 14
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +118,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 85a6af1bd65dc0c10800000000000000
-      internalID: 2021224999896640088
+      spriteID: 0dd7b5f9dd48e21a0800000000000000
+      internalID: -6832377497278251568
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Heartless_2
+      name: Nimb_IDLE_body_1
       rect:
         serializedVersion: 2
-        x: 9
-        y: 6
-        width: 7
-        height: 9
+        x: 23
+        y: 0
+        width: 14
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,8 +140,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6b28199577731e1a0800000000000000
-      internalID: -6782078578099912010
+      spriteID: e405879a86ff781c0800000000000000
+      internalID: -4501348477548605362
       vertices: []
       indices: 
       edges: []
@@ -175,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -185,9 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Heartless_0: 3089805966375108791
-      Heartless_1: 2021224999896640088
-      Heartless_2: -6782078578099912010
+      Nimb_IDLE_body_0: -6832377497278251568
+      Nimb_IDLE_body_1: -4501348477548605362
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
