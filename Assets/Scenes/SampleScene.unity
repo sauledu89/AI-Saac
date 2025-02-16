@@ -511,7 +511,7 @@ MonoBehaviour:
   prefabDisparo: {fileID: 2324205247770700288, guid: 168aef96a50a8a9448420fe349858ff0, type: 3}
   puntoPartida: {fileID: 1977011941}
   cooldown: 1
-  animator: {fileID: 0}
+  Head: {fileID: 557499040}
 --- !u!95 &557499044
 Animator:
   serializedVersion: 7
@@ -1058,6 +1058,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VidaMaxima: 6
+  VidaActual: 0
   VidaImagen:
   - {fileID: 1791131037}
   - {fileID: 900192947}
@@ -1065,6 +1066,8 @@ MonoBehaviour:
   - {fileID: 1650278470}
   - {fileID: 289113037}
   - {fileID: 520985109}
+  tiempoEsperaRegeneracion: 7
+  intervaloRegeneracion: 1
 --- !u!95 &826469857
 Animator:
   serializedVersion: 7

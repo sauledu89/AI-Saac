@@ -6,20 +6,20 @@ public class PlayerShoot : MonoBehaviour
     public GameObject puntoPartida;
     public float cooldown = 1f;
 
-
     private float tiempoUltimoDisparo;
-    public Animator animator;
+    public GameObject Head; // Referencia a la cabeza para actualizar su animación
+
     void Start()
     {
-        animator = GetComponent<Animator>();
+        if (Head == null)
+        {
+            Debug.LogError("Head no asignado en PlayerShoot. Asigna el objeto en el Inspector.");
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        float inputHorizontal2 = Input.GetAxis("Horizontal");
-        float inputVertical2 = Input.GetAxis("Vertical");
-
         if (Time.time - tiempoUltimoDisparo >= cooldown)
         {
             float inputHorizontal = Input.GetAxis("HorizontalButton");
@@ -38,20 +38,38 @@ public class PlayerShoot : MonoBehaviour
                         movimientoDisparo.DireccionDisparo = direccionDisparo;
                     }
                     tiempoUltimoDisparo = Time.time;
+
+                    // Actualizar la animación de la cabeza con base en la dirección del disparo
+                    ActualizarAnimacionCabeza(direccionDisparo);
                 }
-
-            }
-            else
-            {
-               // Debug.Log("El punto de partida no está asignado en el script de Disparo");
-
             }
         }
-
     }
-    void ActualizarAnimaciones(float inputHorizontal2, float inputVertical2)
+
+    void ActualizarAnimacionCabeza(Vector2 direccionDisparo)
     {
-        animator.SetFloat("Horizontal", inputHorizontal2);
-        animator.SetFloat("Vertical", inputVertical2);
+        // Resetear todas las animaciones
+        Head.GetComponent<Animator>().SetBool("lookright", false);
+        Head.GetComponent<Animator>().SetBool("lookleft", false);
+        Head.GetComponent<Animator>().SetBool("lookup", false);
+        Head.GetComponent<Animator>().SetBool("lookdown", false);
+
+        // Determinar la dirección del disparo
+        if (direccionDisparo.x > 0.5f) // Derecha
+        {
+            Head.GetComponent<Animator>().SetBool("lookright", true);
+        }
+        else if (direccionDisparo.x < -0.5f) // Izquierda
+        {
+            Head.GetComponent<Animator>().SetBool("lookleft", true);
+        }
+        else if (direccionDisparo.y > 0.5f) // Arriba
+        {
+            Head.GetComponent<Animator>().SetBool("lookup", true);
+        }
+        else if (direccionDisparo.y < -0.5f) // Abajo
+        {
+            Head.GetComponent<Animator>().SetBool("lookdown", true);
+        }
     }
 }
