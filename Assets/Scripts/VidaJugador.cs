@@ -112,14 +112,14 @@ public class VidaJugador : MonoBehaviour
     void FixedUpdate()
     {
 
+        Debug.Log("Vidas: " + VidaActual);
+
         if (Input.GetKey("r"))
         {
             Debug.Log("Reset");
             ReiniciarEscena();
         }
 
-        Debug.Log("tiempoEsperaRegeneracion: " + tiempoEsperaRegeneracion);
-        Debug.Log("Vidas: " + VidaActual);
 
     }
 }

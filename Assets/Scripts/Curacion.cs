@@ -13,6 +13,7 @@ public class    Curacion : MonoBehaviour
         {
             vidaJugador.ObtenerVida(1);
             Console.WriteLine("Curación +1");
+            gameObject.SetActive(false);    
 
         }
     }
