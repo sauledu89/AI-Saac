@@ -17,11 +17,34 @@ public class VidaJugador : MonoBehaviour
     private Coroutine regeneracionVida;
     private bool regenerando = false; // Evita que la regeneración se active varias veces
 
+    private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer del cuerpo
+    public SpriteRenderer spriteRenderer2; // Referencia al SpriteRenderer de la cabeza
+    public float tiempoColorDaño = 10f; // Duración del cambio de color al recibir daño
+
     void Start()
     {
         VidaActual = VidaMaxima;
         actualizarInterfaz();
         tiempoUltimoDaño = Time.time;
+
+        // Obtener el SpriteRenderer del cuerpo
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("No se encontró un SpriteRenderer en el jugador.");
+        }
+
+        // Obtener el SpriteRenderer de la cabeza (Objeto hijo)
+        if (spriteRenderer2 == null) // Verifica si no ha sido asignado en el Inspector
+        {
+            spriteRenderer2 = transform.Find("Head").GetComponent<SpriteRenderer>();
+        }
+
+        if (spriteRenderer2 == null)
+        {
+            Debug.LogError("No se encontró un SpriteRenderer en la cabeza.");
+        }
     }
 
     void actualizarInterfaz()
@@ -49,6 +72,9 @@ public class VidaJugador : MonoBehaviour
         VidaActual = Mathf.Clamp(VidaActual, 0, VidaMaxima);
         actualizarInterfaz();
 
+        // Cambiar el color para indicar daño
+        StartCoroutine(EfectoRecibirDaño());
+
         // Reiniciar el contador de regeneración de vida
         tiempoUltimoDaño = Time.time;
 
@@ -62,6 +88,29 @@ public class VidaJugador : MonoBehaviour
 
         // Iniciar un nuevo temporizador para regeneración
         StartCoroutine(IniciarRegeneracion());
+    }
+    
+    IEnumerator EfectoRecibirDaño()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.red; // Cambiar a rojo
+        }
+        if (spriteRenderer2 != null)
+        {
+            spriteRenderer2.color = Color.red; // Cambiar a rojo
+        }
+
+        yield return new WaitForSeconds(tiempoColorDaño); // Esperar
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white; // Restaurar el color original
+        }
+        if (spriteRenderer2 != null)
+        {
+            spriteRenderer2.color = Color.white; // Restaurar el color original
+        }
     }
 
     IEnumerator IniciarRegeneracion()
@@ -100,8 +149,7 @@ public class VidaJugador : MonoBehaviour
         regenerando = false;
     }
 
-
-    public void ObtenerVida (int CuraTotal)
+    public void ObtenerVida(int CuraTotal)
     {
         VidaActual += CuraTotal;
         VidaActual = Mathf.Clamp(VidaActual, 0, VidaMaxima);
@@ -111,7 +159,6 @@ public class VidaJugador : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-
         Debug.Log("Vidas: " + VidaActual);
 
         if (Input.GetKey("r"))
@@ -119,7 +166,5 @@ public class VidaJugador : MonoBehaviour
             Debug.Log("Reset");
             ReiniciarEscena();
         }
-
-
     }
 }

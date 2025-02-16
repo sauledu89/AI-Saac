@@ -7,7 +7,7 @@ public class ProvocaDaño : MonoBehaviour
 
     public VidaJugador vidaJugador;
     private bool PuedeDañar = true;
-    private float Cooldown = 3f;
+    public float Cooldown = 1f;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
