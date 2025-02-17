@@ -1,9 +1,11 @@
 # AI-Saac
 
 Inteligencia Artificial e ingeniería del conocimiento
+
 Proyecto Primer Parcial: The Binding of AI-saac
 
 Motor de desarrollo : UNITY
+
 Software de pixel art : Pyxel Edit
 
 Link de nuestros avances en trello:
