@@ -15,11 +15,11 @@ public class VidaJugador : MonoBehaviour
     public float intervaloRegeneracion = 1f;    // Tiempo entre cada punto de vida restaurado
 
     private Coroutine regeneracionVida;
-    private bool regenerando = false; // Evita que la regeneración se active varias veces
+    private bool regenerando = false;      // Evita que la regeneración se active varias veces
 
     private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer del cuerpo
     public SpriteRenderer spriteRenderer2; // Referencia al SpriteRenderer de la cabeza
-    public float tiempoColorDaño = 10f; // Duración del cambio de color al recibir daño
+    public float tiempoColorDaño = 10f;    // Duración del cambio de color al recibir daño
 
     void Start()
     {
@@ -27,6 +27,7 @@ public class VidaJugador : MonoBehaviour
         actualizarInterfaz();
         tiempoUltimoDaño = Time.time;
 
+        // Queremos obtener los 
         // Obtener el SpriteRenderer del cuerpo
         spriteRenderer = GetComponent<SpriteRenderer>();
 

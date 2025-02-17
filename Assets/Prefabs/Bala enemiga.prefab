@@ -139,3 +139,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocidad: 70
   "da\xF1o": 1
+  distanciaMaxima: 100
