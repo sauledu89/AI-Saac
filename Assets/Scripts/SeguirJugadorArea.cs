@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
-public class SeguirJugadorArea : MonoBehaviour
+public class EnemigoEscapista : MonoBehaviour
 {
     public float radioBusqueda;
     public LayerMask capaJugador;
@@ -14,6 +13,10 @@ public class SeguirJugadorArea : MonoBehaviour
 
     public float distanciaEvitar = 1f; // Distancia para detectar obstáculos
     public LayerMask capaObstaculo;   // Capa de obstáculos
+
+    public GameObject balaEnemigo;  // Prefab de la bala
+    public float FireRate = 1f;      // Tiempo entre disparos
+    private float tiempoUltimoDisparo;
 
     public EstadosMovimiento estadoActual;
     public enum EstadosMovimiento
@@ -77,6 +80,9 @@ public class SeguirJugadorArea : MonoBehaviour
 
         transform.position = nuevaPosicion;
 
+        // Disparar mientras se aleja
+        Disparar();
+
         if (Vector2.Distance(transform.position, puntoInicial) > distanciaMaxima)
         {
             estadoActual = EstadosMovimiento.Volviendo;
@@ -90,6 +96,22 @@ public class SeguirJugadorArea : MonoBehaviour
         if (Vector2.Distance(transform.position, puntoInicial) < 0.1f)
         {
             estadoActual = EstadosMovimiento.Esperando;
+        }
+    }
+
+    private void Disparar()
+    {
+        if (Time.time > FireRate + tiempoUltimoDisparo && transformJugador != null)
+        {
+            tiempoUltimoDisparo = Time.time;
+
+            // Calcular dirección hacia el jugador
+            Vector2 direccionJugador = (transformJugador.position - transform.position).normalized;
+            float angulo = Mathf.Atan2(direccionJugador.y, direccionJugador.x) * Mathf.Rad2Deg;
+            Quaternion rotacionBala = Quaternion.Euler(0, 0, angulo);
+
+            // Instanciar la bala en la dirección correcta
+            Instantiate(balaEnemigo, transform.position, rotacionBala);
         }
     }
 

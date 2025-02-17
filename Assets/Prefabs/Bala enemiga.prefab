@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2820661774031713910}
   - component: {fileID: -2783430953209316146}
   - component: {fileID: 4727668397356186954}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Bala enemiga
   m_TagString: Untagged
   m_Icon: {fileID: 0}

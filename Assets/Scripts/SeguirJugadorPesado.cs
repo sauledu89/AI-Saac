@@ -1,22 +1,26 @@
 using UnityEngine;
 using System.Collections;
 
-public class SeguirJugadorPesado : MonoBehaviour
+public class EnemigoPesado : MonoBehaviour
 {
     public float radioBusqueda;
     public LayerMask capaJugador;
     public Transform transformJugador;
 
-    public float velocidadMaxima;   // Velocidad máxima del enemigo
-    public float aceleracion;       // Cuánto acelera por segundo
-    private float velocidadActual;  // Velocidad del enemigo en cada frame
+    public float velocidadMaxima;
+    public float aceleracion;
+    public float desaceleracion; // Parámetro para hacer que le cueste frenar
+    private float velocidadActual;
     public float distanciaMaxima;
     public Vector3 puntoInicial;
 
+    public float tiempoPrediccion = 0.5f; // Tiempo en segundos para predecir la posición futura del jugador
+
     public Rigidbody2D rb2D;
-    private bool chocoConPared = false; // Indica si chocó con una pared
+    private bool chocoConPared = false;
 
     public EstadosMovimiento estadoActual;
+
     public enum EstadosMovimiento
     {
         Esperando,
@@ -28,6 +32,7 @@ public class SeguirJugadorPesado : MonoBehaviour
     {
         puntoInicial = transform.position;
         velocidadActual = 0; // Comienza sin velocidad
+        rb2D.constraints = RigidbodyConstraints2D.FreezeRotation; // Evita que rote
     }
 
     private void FixedUpdate()
@@ -64,18 +69,18 @@ public class SeguirJugadorPesado : MonoBehaviour
             return;
         }
 
-        if (!chocoConPared) // Solo se mueve si no ha chocado con una pared
-        {
-            velocidadActual = Mathf.Lerp(velocidadActual, velocidadMaxima, aceleracion * Time.deltaTime); // Aceleración progresiva
+        // Predecir la posición futura del jugador
+        Vector2 posicionFutura = PredecirPosicionJugador();
 
-            if (transform.position.x < transformJugador.position.x)
-            {
-                rb2D.linearVelocity = new Vector2(velocidadActual, rb2D.linearVelocity.y);
-            }
-            else
-            {
-                rb2D.linearVelocity = new Vector2(-velocidadActual, rb2D.linearVelocity.y);
-            }
+        // Dirección hacia la posición futura del jugador
+        Vector2 direccion = (posicionFutura - (Vector2)transform.position).normalized;
+
+        // Aceleración progresiva
+        velocidadActual = Mathf.MoveTowards(velocidadActual, velocidadMaxima, aceleracion * Time.deltaTime);
+
+        if (!chocoConPared)
+        {
+            rb2D.linearVelocity = direccion * velocidadActual; // Movimiento en X y Y
         }
 
         // Si se aleja demasiado del punto inicial o del jugador, regresa
@@ -89,22 +94,39 @@ public class SeguirJugadorPesado : MonoBehaviour
 
     private void EstadoVolviendo()
     {
-        velocidadActual = Mathf.Lerp(velocidadActual, velocidadMaxima, aceleracion * Time.deltaTime); // Aceleración progresiva
+        Vector2 direccionRegreso = ((Vector2)puntoInicial - (Vector2)transform.position).normalized;
 
-        if (transform.position.x < puntoInicial.x)
+        // Desaceleración progresiva antes de cambiar de dirección
+        if (Vector2.Distance(transform.position, puntoInicial) > 1f)
         {
-            rb2D.linearVelocity = new Vector2(velocidadActual, rb2D.linearVelocity.y);
+            velocidadActual = Mathf.MoveTowards(velocidadActual, velocidadMaxima, aceleracion * Time.deltaTime);
         }
         else
         {
-            rb2D.linearVelocity = new Vector2(-velocidadActual, rb2D.linearVelocity.y);
+            velocidadActual = Mathf.MoveTowards(velocidadActual, 0, desaceleracion * Time.deltaTime);
         }
 
+        rb2D.linearVelocity = direccionRegreso * velocidadActual;
+
+        // Cuando llega a su punto inicial, se detiene completamente
         if (Vector2.Distance(transform.position, puntoInicial) < 0.1f)
         {
             rb2D.linearVelocity = Vector2.zero;
+            velocidadActual = 0; // Reiniciar velocidad
             estadoActual = EstadosMovimiento.Esperando;
         }
+    }
+
+    private Vector2 PredecirPosicionJugador()
+    {
+        if (transformJugador == null) return transform.position;
+
+        Rigidbody2D rbJugador = transformJugador.GetComponent<Rigidbody2D>();
+        if (rbJugador == null) return transformJugador.position;
+
+        // Calcular la posición futura del jugador basado en su velocidad actual
+        Vector2 posicionFutura = (Vector2)transformJugador.position + (rbJugador.linearVelocity * tiempoPrediccion);
+        return posicionFutura;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -113,11 +135,10 @@ public class SeguirJugadorPesado : MonoBehaviour
         {
             Debug.Log("El enemigo pesado chocó contra la pared");
 
-            rb2D.linearVelocity = Vector2.zero; // Detener completamente el movimiento
-            velocidadActual = 0; // Reiniciar la velocidad a 0 para que vuelva a acelerar lentamente
+            rb2D.linearVelocity = Vector2.zero;
+            velocidadActual = 0; // Se detiene por completo
             chocoConPared = true;
 
-            // Volver a moverse tras 1 segundo
             StartCoroutine(RecuperarMovimiento());
         }
     }
