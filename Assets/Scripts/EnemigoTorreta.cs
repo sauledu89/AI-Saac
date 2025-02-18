@@ -16,12 +16,17 @@ public class EnemigoTorreta : MonoBehaviour
     private Transform objetivoJugador;
     private bool persiguiendoJugador = false;
     private Quaternion rotacionInicial;
-    public float tiempoParaRegresar = 3f; // Tiempo antes de volver a la posición inicial
+    private Quaternion ultimaRotacion;
+
+    public float tiempoParaRegresar = 3f;
+    public float tiempoDisparandoExtra = 2f;
     private Coroutine regresarRotacion;
 
     public SpriteRenderer conoDeVisionRenderer;
     public Color colorNormal = new Color(1f, 1f, 1f, 0.5f);
     public Color colorDetectando = new Color(1f, 0f, 0f, 0.5f);
+
+    private bool disparandoTrasPerderJugador = false;
 
     private void Start()
     {
@@ -30,10 +35,8 @@ public class EnemigoTorreta : MonoBehaviour
             Debug.LogError("No se asignó el SpriteRenderer del cono de visión en " + gameObject.name);
         }
 
-        // Guardar la rotación inicial de la torreta
         rotacionInicial = transform.rotation;
 
-        // Asegurar que el cono de visión tenga el color normal al inicio
         if (conoDeVisionRenderer != null)
         {
             conoDeVisionRenderer.color = colorNormal;
@@ -46,22 +49,26 @@ public class EnemigoTorreta : MonoBehaviour
 
         if (jugadorDetectado)
         {
-            objetivoJugador = jugadorDetectado.transform;
-            persiguiendoJugador = true;
-
-            if (regresarRotacion != null)
-            {
-                StopCoroutine(regresarRotacion); // Cancelar la rotación de regreso si el jugador vuelve
-                regresarRotacion = null;
-            }
-
-            Vector2 direccionJugador = (objetivoJugador.position - transform.position).normalized;
+            Vector2 direccionJugador = (jugadorDetectado.transform.position - transform.position).normalized;
             float angulo = Vector2.Angle(transform.right, direccionJugador);
 
-            if (angulo < anguloVision / 2) // Si está dentro del cono de visión
+            // Si el jugador está dentro del cono de visión
+            if (angulo < anguloVision / 2)
             {
+                objetivoJugador = jugadorDetectado.transform;
+                persiguiendoJugador = true;
+                disparandoTrasPerderJugador = false;
+
+                if (regresarRotacion != null)
+                {
+                    StopCoroutine(regresarRotacion);
+                    regresarRotacion = null;
+                }
+
                 CambiarColorConoVision(colorDetectando);
                 RotarHaciaJugador(direccionJugador);
+
+                ultimaRotacion = transform.rotation;
 
                 if (Time.time > FireRate + tiempoUltimoDisparo)
                 {
@@ -69,13 +76,26 @@ public class EnemigoTorreta : MonoBehaviour
                     Disparar();
                 }
             }
+            else // El jugador está en el radio, pero fuera del cono de visión
+            {
+                if (persiguiendoJugador)
+                {
+                    persiguiendoJugador = false;
+                    disparandoTrasPerderJugador = true;
+                    StartCoroutine(DispararTrasPerderJugador());
+                }
+
+                // Cambia el color a blanco ya que el jugador no está en el cono
+                CambiarColorConoVision(colorNormal);
+            }
         }
         else
         {
-            if (persiguiendoJugador) // Si acaba de perder al jugador
+            if (persiguiendoJugador)
             {
                 persiguiendoJugador = false;
-                regresarRotacion = StartCoroutine(RegresarARotacionInicial());
+                disparandoTrasPerderJugador = true;
+                StartCoroutine(DispararTrasPerderJugador());
             }
 
             CambiarColorConoVision(colorNormal);
@@ -102,18 +122,38 @@ public class EnemigoTorreta : MonoBehaviour
         }
     }
 
+    private IEnumerator DispararTrasPerderJugador()
+    {
+        Quaternion direccionFinal = ultimaRotacion;
+        float tiempoFinalDisparo = Time.time + tiempoDisparandoExtra;
+
+        while (Time.time < tiempoFinalDisparo)
+        {
+            transform.rotation = direccionFinal;
+
+            if (Time.time > FireRate + tiempoUltimoDisparo)
+            {
+                tiempoUltimoDisparo = Time.time;
+                Disparar();
+            }
+
+            yield return null;
+        }
+
+        regresarRotacion = StartCoroutine(RegresarARotacionInicial());
+    }
+
     private IEnumerator RegresarARotacionInicial()
     {
         yield return new WaitForSeconds(tiempoParaRegresar);
 
-        // Regresa gradualmente a la rotación original
         while (Quaternion.Angle(transform.rotation, rotacionInicial) > 0.1f)
         {
             transform.rotation = Quaternion.Lerp(transform.rotation, rotacionInicial, velocidadRotacion * Time.deltaTime);
             yield return null;
         }
 
-        transform.rotation = rotacionInicial; // Asegurar que quede perfectamente alineada
+        transform.rotation = rotacionInicial;
     }
 
     private void OnDrawGizmos()

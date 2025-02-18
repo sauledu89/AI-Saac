@@ -15,7 +15,7 @@ public class VidaJugador : MonoBehaviour
     public float intervaloRegeneracion = 1f;    // Tiempo entre cada punto de vida restaurado
 
     private Coroutine regeneracionVida;
-    private bool regenerando = false;      // Evita que la regeneración se active varias veces
+    public bool regenerando = false;      // Evita que la regeneración se active varias veces
 
     private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer del cuerpo
     public SpriteRenderer spriteRenderer2; // Referencia al SpriteRenderer de la cabeza
