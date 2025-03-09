@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Node
 {
+
     public int x, y;                   // Coordenadas del nodo en la cuadrícula
     public bool isWalkable;            // Se puede caminar sobre este nodo?
     public bool partOfRoute = false;   // Es parte del camino encontrado?
@@ -18,7 +19,6 @@ public class Node
         parentRef = null;              // Se inicializa sin padre
     }
 }
-
 
 /*
    Igual que el nodo del proyecto 3D
@@ -41,4 +41,4 @@ public class Node
     }
 }
 
-*/ 
+*/
