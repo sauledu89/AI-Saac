@@ -32,7 +32,7 @@ public class EnemigoPesado : MonoBehaviour
     {
         puntoInicial = transform.position;
         velocidadActual = 0; // Comienza sin velocidad
-        rb2D.constraints = RigidbodyConstraints2D.FreezeRotation; // Evita que rote
+        //rb2D.constraints = RigidbodyConstraints2D.FreezeRotation; // Evita que rote
     }
 
     private void FixedUpdate()
