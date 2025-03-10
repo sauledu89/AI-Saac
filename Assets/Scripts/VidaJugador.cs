@@ -90,7 +90,7 @@ public class VidaJugador : MonoBehaviour
         // Iniciar un nuevo temporizador para regeneración
         StartCoroutine(IniciarRegeneracion());
     }
-    
+
     IEnumerator EfectoRecibirDaño()
     {
         if (spriteRenderer != null)
