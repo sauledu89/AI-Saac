@@ -4,28 +4,41 @@ using UnityEngine;
 
 public class ProvocaDaño : MonoBehaviour
 {
-
     public VidaJugador vidaJugador;
-    private bool PuedeDañar = true;
+
+    [Header("Configuración de Daño")]
+    public LayerMask capaJugador;  // Layer para el jugador
+    public LayerMask capaEnemigo;  // Layer para los enemigos
     public float Cooldown = 1f;
-    public BaseEnemy vidaActual;
+    private bool PuedeDañar = true;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && PuedeDañar)
+        int otherLayer = other.gameObject.layer;
+
+        // Si colisiona con el jugador
+        if (((1 << otherLayer) & capaJugador) != 0 && PuedeDañar)
         {
-            vidaJugador.RecibirDaño(1);
-            PuedeDañar = false;
-            StartCoroutine(CooldownDaño());
-            Console.WriteLine("-1 Vida");
+            if (vidaJugador != null)
+            {
+                vidaJugador.RecibirDaño(1);
+                PuedeDañar = false;
+                StartCoroutine(CooldownDaño());
+                Debug.Log("-1 Vida al Jugador");
+            }
         }
 
-        if (other.CompareTag("Enemy") && PuedeDañar)
+        // Si colisiona con un enemigo que tiene el script BaseEnemy
+        if (((1 << otherLayer) & capaEnemigo) != 0 && PuedeDañar)
         {
-            vidaActual.RecibirDaño(1);
-            PuedeDañar = false;
-            StartCoroutine(CooldownDaño());
-            Console.WriteLine("-1 Vida");
+            BaseEnemy enemigo = other.GetComponent<BaseEnemy>(); // Obtiene el script BaseEnemy del enemigo golpeado
+            if (enemigo != null)
+            {
+                enemigo.RecibirDaño(1); // Llama a la función RecibirDaño de ese enemigo en específico
+                PuedeDañar = false;
+                StartCoroutine(CooldownDaño());
+                Debug.Log($"-1 Vida al Enemigo: {other.gameObject.name}");
+            }
         }
     }
 
@@ -34,5 +47,4 @@ public class ProvocaDaño : MonoBehaviour
         yield return new WaitForSeconds(Cooldown);
         PuedeDañar = true;
     }
-
 }

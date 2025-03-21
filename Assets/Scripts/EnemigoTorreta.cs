@@ -26,7 +26,8 @@ public class EnemigoTorreta : MonoBehaviour
     public Color colorNormal = new Color(1f, 1f, 1f, 0.5f);
     public Color colorDetectando = new Color(1f, 0f, 0f, 0.5f);
 
-    private bool disparandoTrasPerderJugador = false;
+  
+    public bool disparandoTrasPerderJugador = false;
 
     private void Start()
     {

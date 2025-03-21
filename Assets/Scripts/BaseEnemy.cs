@@ -4,7 +4,7 @@ using System.Collections;
 public class BaseEnemy : MonoBehaviour
 {
     public int vidaMaxima = 3;
-    private int vidaActual;
+    public int vidaActual;
     public float tiempoColorDaño = 0.2f;
     private SpriteRenderer spriteRenderer;
 
