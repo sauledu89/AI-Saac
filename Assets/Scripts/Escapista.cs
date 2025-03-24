@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using Unity.VisualScripting;
 
 /*
    Este enemigo Escapista combina dos comportamientos clave:
@@ -63,85 +64,53 @@ public class Escapista : MonoBehaviour
 
     void Update()
     {
-        DetectarJugador(); // El enemigo siempre está "escaneando" al jugador
+        DetectarJugador(); // Siempre intenta detectar al jugador y rota si es necesario
 
         switch (estadoActual)
         {
             case EstadoEscapista.Activo:
                 if (objetivoJugador != null)
                 {
-                    ComportamientoActivo();                   // Perseguir o quedarse quieto
-                    Disparar(fireRateActivo, 0f);             // Dispara con puntería perfecta
+                    ComportamientoActivo(); // Perseguir o quedarse quieto según la situación
+                    Disparar(fireRateActivo, 0f); // Dispara con puntería perfecta
                 }
                 break;
 
             case EstadoEscapista.Cansado:
-                agente.SetDestination(transform.position);          // No se mueve
-                Disparar(fireRateCansado, errorPunteriaCansado);    // Dispara más lento y con menos precisión
+                // En el estado cansado, el enemigo no se mueve pero puede seguir disparando
+                Disparar(fireRateCansado, errorPunteriaCansado); // Dispara más lento y con menos precisión
                 break;
         }
     }
+
     void DetectarJugador()
     {
-        // Usamos un OverlapCircle (círculo de detección) para detectar si hay un jugador dentro del radio de visión lejana
-        // Esta función nos devuelve el primer Collider2D que encuentra en esa área (más que suficiente para este enemigo).
         Collider2D jugadorDetectado = Physics2D.OverlapCircle(transform.position, radioVisionLejana, capaJugador);
-
         if (jugadorDetectado)
         {
-            // Si el jugador fue detectado, lo guardamos como objetivo
             objetivoJugador = jugadorDetectado.transform;
+            Vector3 direccion = (objetivoJugador.position - transform.position).normalized;
 
-            // Calculamos qué tan lejos está el jugador
-            float distancia = Vector3.Distance(transform.position, objetivoJugador.position);
+            // Asegúrate de calcular y aplicar la rotación aquí directamente
+            RotarHaciaJugador(direccion);
 
-            // --- Si está muy cerca (dentro del radio de detección corto) ---
-            // Solo si está en estado Activo, entonces **huye**
-            if (distancia <= radioDeteccion && estadoActual == EstadoEscapista.Activo)
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, direccion, radioVisionLejana, capaJugador | capaObstaculos);
+            Debug.DrawRay(transform.position, direccion * radioVisionLejana, Color.yellow);
+
+            if (hit.collider != null && hit.collider.CompareTag("Player"))
             {
-                CambiarColorConoVision(colorDetectando); // Cambiamos el color del cono como retroalimentación visual
-                HuirDeJugador();                         // Hacemos que huya, se explicará más abajo
-            }
-            else
-            {
-                // --- Si el jugador está lejos (pero en radio de visión) ---
-                // Lanzamos un Raycast hacia el jugador para ver si hay obstáculos en medio
-
-                Vector3 direccion = (objetivoJugador.position - transform.position).normalized;
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, direccion, radioVisionLejana, capaJugador | capaObstaculos);
-
-                // Dibujamos el raycast en la escena para debug visual
-                Debug.DrawRay(transform.position, direccion * radioVisionLejana, Color.yellow);
-
-                if (hit.collider != null && hit.collider.CompareTag("Player"))
+                // Aquí manejas el comportamiento cuando el jugador está visible sin obstáculos
+                CambiarColorConoVision(colorDetectando);  // Feedback visual (cono en rojo)
+                if (estadoActual == EstadoEscapista.Activo)
                 {
-                    // Si el raycast impacta con el jugador (sin obstáculos en medio)
-
-                    agente.isStopped = true;                         // Nos detenemos, ya que el jugador está visible directamente
-                    CambiarColorConoVision(colorDetectando);         // Feedback visual (cono en rojo)
-                    RotarHaciaDireccion(direccion);                  // Miramos hacia el jugador
-
-                    // Comenzamos el temporizador para cansarnos, solo si estamos en estado Activo
-                    if (estadoActual == EstadoEscapista.Activo && rutinaCansancio == null)
-                    {
-                        rutinaCansancio = StartCoroutine(IniciarCansancio());
-                    }
-                }
-                else
-                {
-                    // Si el raycast no impactó directamente al jugador (hay obstáculos),
-                    // intentamos movernos hacia él (lo perseguimos)
-
-                    agente.isStopped = false;
-                    agente.SetDestination(objetivoJugador.position);
+                    // Comportamientos adicionales aquí
                 }
             }
         }
         else
         {
-            // Si NO detectamos jugador, entonces detenemos el movimiento y regresamos la visión a su color base
+            // Si NO detectamos al jugador, entonces regresamos la visión a su color base
             CambiarColorConoVision(colorNormal);
-            agente.isStopped = false;
         }
     }
 
@@ -206,24 +175,38 @@ public class Escapista : MonoBehaviour
     }
     void HuirDeJugador()
     {
+        // Primero, verifica si alguna referencia necesaria es nula. Si el 'objetivoJugador' o el 'agente' (NavMeshAgent)
+        // son nulos, la función termina inmediatamente, ya que no puede ejecutar la lógica de huida sin ellos.
         if (objetivoJugador == null || agente == null) return;
 
-        // Calculamos la dirección opuesta al jugador
+        // Calcula la dirección para huir del jugador, obteniendo un vector que apunta en dirección opuesta al jugador.
+        // 'normalized' asegura que el vector tenga una longitud de 1, manteniendo la dirección pero ignorando la distancia.
         Vector3 direccionAlejarse = (transform.position - objetivoJugador.position).normalized;
+
+        // Calcula un punto de destino donde el enemigo intentará huir. Este punto está a dos veces el 'radioDeteccion' 
+        // del enemigo en la dirección opuesta al jugador.
         Vector3 puntoHuida = transform.position + direccionAlejarse * radioDeteccion * 2;
 
+        // Estructura utilizada para almacenar información sobre los hits del NavMesh.
         NavMeshHit hit;
 
-        // Intentamos encontrar un punto válido en el NavMesh en la dirección de huida
+        // Intenta encontrar un punto en el NavMesh que esté cerca del punto de huida calculado.
+        // 'SamplePosition' busca un punto en el NavMesh cerca de 'puntoHuida' dentro de una esfera de radio especificado.
+        // Si encuentra un punto válido, 'hit.position' contendrá la ubicación exacta.
         if (NavMesh.SamplePosition(puntoHuida, out hit, radioDeteccion * 2, NavMesh.AllAreas))
         {
+            // Si encuentra un lugar válido para huir, establece ese punto como el destino del agente de NavMesh.
             agente.SetDestination(hit.position);
+
+            // Guarda este punto en 'GizmoPosicionFlee' para propósitos de visualización en el editor.
             GizmoPosicionFlee = hit.position;
+
+            // Dibuja un rayo verde desde la posición actual hacia el punto de huida para visualizar la dirección de huida.
             Debug.DrawRay(transform.position, (hit.position - transform.position), Color.green, 1f);
         }
         else
         {
-            // Si no puede huir hacia atrás, intenta avanzar hacia el jugador como último recurso
+            // Si no encuentra un punto de huida válido en la dirección opuesta, intenta huir hacia el jugador como último recurso.
             Vector3 puntoAlternativo = transform.position + (objetivoJugador.position - transform.position).normalized * radioDeteccion * 2;
             if (NavMesh.SamplePosition(puntoAlternativo, out hit, radioDeteccion * 2, NavMesh.AllAreas))
             {
@@ -233,19 +216,21 @@ public class Escapista : MonoBehaviour
             }
             else
             {
-                // Si tampoco hay punto válido, se queda quieto
+                // Si no hay un punto válido hacia el jugador tampoco, el enemigo se queda quieto.
                 agente.SetDestination(transform.position);
                 GizmoPosicionFlee = transform.position;
                 Debug.DrawRay(transform.position, Vector3.up * 2, Color.red, 1f);
             }
         }
 
-        // Iniciar el ciclo de cansancio si aún no ha empezado
+        // Si la rutina de cansancio no ha sido iniciada, empieza una nueva corrutina llamando a 'IniciarCansancio'.
+        // Esto controla el cambio de estado del enemigo de activo a cansado después de huir.
         if (rutinaCansancio == null)
         {
             rutinaCansancio = StartCoroutine(IniciarCansancio());
         }
     }
+
 
     /*
     ¿Qué es un IEnumerator y para qué lo usamos?
@@ -296,23 +281,27 @@ public class Escapista : MonoBehaviour
         rutinaCansancio = null;
     }
 
+    void RotarHaciaJugador(Vector3 direccion)
+    {
+        // Convertimos la dirección a un ángulo en grados
+        float angulo = Mathf.Atan2(direccion.y, direccion.x) * Mathf.Rad2Deg +180;  // Ajuste de n grados
+
+        // Aplicamos la rotación al transform del enemigo
+        transform.rotation = Quaternion.Euler(0, 0, angulo);
+    }
+
     void RotarHaciaDireccion(Vector2 direccion)
     {
-        // Verificamos que la dirección tenga magnitud suficiente para rotar (no rotamos si es un vector nulo o casi cero)
         if (direccion.sqrMagnitude > 0.01f)
         {
-            // Convertimos la dirección en un ángulo en grados (usamos Atan2 que devuelve el ángulo en radianes)
+            // Calcula el ángulo y conviértelo a grados
             float angulo = Mathf.Atan2(direccion.y, direccion.x) * Mathf.Rad2Deg;
 
-            // Creamos una rotación en el eje Z, ya que estamos en un entorno 2D
-            Quaternion rotacion = Quaternion.Euler(0, 0, angulo);
+            // Crea la rotación objetivo
+            Quaternion rotacionObjetivo = Quaternion.Euler(0, 0, angulo);
 
-            // Aplicamos la rotación gradualmente al enemigo (RotateTowards evita que gire de golpe)
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                rotacion,
-                velocidadRotacion * Time.deltaTime * 200f // Controlamos qué tan rápido rota
-            );
+            // Interpola hacia la rotación objetivo
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.deltaTime * 200f);
         }
     }
     void CambiarColorConoVision(Color nuevoColor)

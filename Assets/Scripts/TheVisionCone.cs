@@ -4,6 +4,10 @@ using System.Collections;
 
 public class VisionCone : MonoBehaviour
 {
+
+    // Este fue el primer enemigo que funciona con NavMesh, este enemigo patrulla y persigue al jugador al detectarlo,
+    // Si lo vuelve a perder, regresa a su patrullaje en la secuencia en la que se quedó. 
+
     // Propiedades de detección del cono de visión
     [Header("Configuración de Visión")]
     public float radioDeteccion = 5f;
