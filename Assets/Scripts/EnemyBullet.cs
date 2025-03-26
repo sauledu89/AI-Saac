@@ -2,27 +2,27 @@ using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour
 {
-    public float velocidad = 5f; // Velocidad de la bala
-    public int daño = 1; // Daño que inflige al jugador
+    public float velocidad = 5f;         // Velocidad de la bala
+    public int daño = 1;                 // Daño que inflige al jugador
+    public float distanciaMaxima = 10f;  // Distancia máxima antes de autodestruirse
+    private Vector3 posicionInicial;     // Guarda la posición donde apareció la bala
 
-    public float distanciaMaxima = 10f; // Distancia máxima que puede recorrer antes de destruirse
-    private Vector3 posicionInicial; // Guarda la posición inicial de la bala
+    [Header("Colisión con obstáculos")]
+    public LayerMask capasQueBloqueanBala; // Layers como "Wall" o "Obstacle" que bloquean la bala
 
     private void Start()
     {
-        // Al iniciar, guardamos la posición inicial de la bala
+        // Guardamos la posición inicial al momento de ser instanciada
         posicionInicial = transform.position;
     }
 
     private void Update()
     {
-        // Mueve la bala hacia adelante en la dirección en la que fue disparada
+        // Mover hacia la derecha local (la bala rota al instanciarse)
         transform.Translate(Time.deltaTime * velocidad * Vector2.right);
 
-        // Calcula la distancia recorrida desde su posición inicial
+        // Si la bala ha recorrido su distancia máxima, se destruye
         float distanciaRecorrida = Vector3.Distance(posicionInicial, transform.position);
-
-        // Si la distancia recorrida supera la distancia máxima, la bala se destruye
         if (distanciaRecorrida > distanciaMaxima)
         {
             Destroy(gameObject);
@@ -31,13 +31,17 @@ public class EnemyBullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Verifica si la bala colisiona con el jugador
+        // 1. Si impacta al jugador
         if (other.TryGetComponent(out VidaJugador vidaJugador))
         {
-            // Si el jugador tiene el script VidaJugador, recibe daño
             vidaJugador.RecibirDaño(daño);
+            Destroy(gameObject);
+            return;
+        }
 
-            // La bala se destruye tras impactar con el jugador
+        // 2. Si choca contra un objeto cuya layer esté incluida en el LayerMask
+        if (((1 << other.gameObject.layer) & capasQueBloqueanBala) != 0)
+        {
             Destroy(gameObject);
         }
     }

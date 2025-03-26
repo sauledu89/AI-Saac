@@ -5,9 +5,11 @@ public class Bullet : MonoBehaviour
     public float velocidad = 5f;
     public float distanciaMaxima = 10f;
     public Vector2 DireccionDisparo;
-    public LayerMask capaEnemigos; // Detección de enemigos
-    public LayerMask capaObstaculos; // Capa de obstáculos sólidos
-    public LayerMask capaObstaculosDestructibles; // Capa de obstáculos que pueden ser destruidos
+
+    public LayerMask capaEnemigos;                  // Detección de enemigos
+    public LayerMask capaObstaculos;                // Capa de obstáculos sólidos
+    public LayerMask capaObstaculosDestructibles;   // Capa de obstáculos que pueden ser destruidos
+    public LayerMask capaMuros;                     // NUEVO: capa para muros sólidos
 
     private float distanciaRecorrida;
 
@@ -33,11 +35,17 @@ public class Bullet : MonoBehaviour
                 enemigo.RecibirDaño(1); // Hacer daño al enemigo
             }
 
-            Destroy(gameObject); // Destruir la bala
+            Destroy(gameObject);
         }
 
-        // Detectar colisión con obstáculos sólidos (se destruye la bala)
+        // Detectar colisión con obstáculos sólidos
         if (((1 << collision.gameObject.layer) & capaObstaculos) != 0)
+        {
+            Destroy(gameObject);
+        }
+
+        // Detectar colisión con muros
+        if (((1 << collision.gameObject.layer) & capaMuros) != 0)
         {
             Destroy(gameObject);
         }
@@ -51,7 +59,7 @@ public class Bullet : MonoBehaviour
                 obstaculo.RecibirDaño(1); // Hacer daño al obstáculo
             }
 
-            Destroy(gameObject); // Destruir la bala tras impactar
+            Destroy(gameObject);
         }
     }
 }

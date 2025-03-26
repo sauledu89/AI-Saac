@@ -19,12 +19,16 @@ public class Escapista : MonoBehaviour
     public LayerMask capaObstaculos;          // Capa que bloquea la línea de visión
     public float velocidadRotacion = 5f;      // Qué tan rápido rota para mirar al jugador
 
+    [Header("Ícono de detección")]
+    public GameObject iconoAlerta; // Signo de admiración que se activa al detectar al jugador
+
+  /*
     [Header("Componentes")]
     public SpriteRenderer conoDeVisionRenderer;                     // Sprite que usamos como cono visual del enemigo
     public Transform conoDeVisionTransform;                         // Transform que rota junto al enemigo
     public Color colorNormal = new Color(1f, 1f, 1f, 0.5f);         // Color base del cono de visión
     public Color colorDetectando = new Color(1f, 0f, 0f, 0.5f);     // Color cuando detecta al jugador
-
+  */
     private Transform objetivoJugador;         // Referencia al jugador detectado
     private NavMeshAgent agente;               // Agente de navegación que moverá al enemigo
     private Coroutine rutinaCansancio;         // Coroutine para manejar el cambio de estados
@@ -55,10 +59,17 @@ public class Escapista : MonoBehaviour
             agente.updateUpAxis = false;
         }
 
-        // Inicializar color del cono de visión
+        /* Inicializar color del cono de visión
         if (conoDeVisionRenderer != null)
         {
             conoDeVisionRenderer.color = colorNormal;
+        }
+        */
+
+        // Desactivar el ícono de alerta al inicio
+        if (iconoAlerta != null)
+        {
+            iconoAlerta.SetActive(false);
         }
     }
 
@@ -89,28 +100,26 @@ public class Escapista : MonoBehaviour
         if (jugadorDetectado)
         {
             objetivoJugador = jugadorDetectado.transform;
-            Vector3 direccion = (objetivoJugador.position - transform.position).normalized;
 
-            // Asegúrate de calcular y aplicar la rotación aquí directamente
+            if (iconoAlerta != null)
+            {
+                iconoAlerta.SetActive(true); // Mostrar ícono
+            }
+
+            Vector3 direccion = (objetivoJugador.position - transform.position).normalized;
             RotarHaciaJugador(direccion);
 
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direccion, radioVisionLejana, capaJugador | capaObstaculos);
             Debug.DrawRay(transform.position, direccion * radioVisionLejana, Color.yellow);
-
-            if (hit.collider != null && hit.collider.CompareTag("Player"))
-            {
-                // Aquí manejas el comportamiento cuando el jugador está visible sin obstáculos
-                CambiarColorConoVision(colorDetectando);  // Feedback visual (cono en rojo)
-                if (estadoActual == EstadoEscapista.Activo)
-                {
-                    // Comportamientos adicionales aquí
-                }
-            }
         }
         else
         {
-            // Si NO detectamos al jugador, entonces regresamos la visión a su color base
-            CambiarColorConoVision(colorNormal);
+            if (iconoAlerta != null)
+            {
+                iconoAlerta.SetActive(false); // Ocultar ícono
+            }
+
+            objetivoJugador = null;
         }
     }
 
@@ -125,7 +134,7 @@ public class Escapista : MonoBehaviour
         if (distanciaJugador <= radioDeteccion)
         {
             Debug.Log("Jugador en radio cercano, HUYENDO.");
-            CambiarColorConoVision(colorDetectando);
+         // CambiarColorConoVision(colorDetectando);
             HuirDeJugador(); // Reutilizamos esta lógica
             return;          // No seguimos con el resto del comportamiento
         }
@@ -142,7 +151,7 @@ public class Escapista : MonoBehaviour
             {
                 // Si tenemos visión directa al jugador, dejamos de movernos y giramos a mirarlo
                 agente.isStopped = true;
-                CambiarColorConoVision(colorDetectando);
+              //CambiarColorConoVision(colorDetectando);
                 RotarHaciaDireccion(direccion);
             }
             else
@@ -304,6 +313,8 @@ public class Escapista : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.deltaTime * 200f);
         }
     }
+
+    /*
     void CambiarColorConoVision(Color nuevoColor)
     {
         // Cambiamos el color del SpriteRenderer que representa el cono de visión.
@@ -313,6 +324,8 @@ public class Escapista : MonoBehaviour
             conoDeVisionRenderer.color = nuevoColor;
         }
     }
+
+    */
     private void OnDrawGizmos()
     {
         // Esto nos permite ver en la ventana de Scene los radios de detección sin necesidad de ejecutar el juego

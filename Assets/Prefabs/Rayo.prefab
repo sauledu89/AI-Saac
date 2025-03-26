@@ -58,6 +58,9 @@ MonoBehaviour:
   capaObstaculosDestructibles:
     serializedVersion: 2
     m_Bits: 1024
+  capaMuros:
+    serializedVersion: 2
+    m_Bits: 4096
 --- !u!212 &2820661774031713910
 SpriteRenderer:
   m_ObjectHideFlags: 0
