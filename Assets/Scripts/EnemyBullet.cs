@@ -4,7 +4,7 @@ public class EnemyBullet : MonoBehaviour
 {
     public float velocidad = 5f;         // Velocidad de la bala
     public int daño = 1;                 // Daño que inflige al jugador
-    public float distanciaMaxima = 10f;  // Distancia máxima antes de autodestruirse
+    public float distanciaMaxima = 30f; // Nueva distancia ajustada para arenas grandes
     private Vector3 posicionInicial;     // Guarda la posición donde apareció la bala
 
     [Header("Colisión con obstáculos")]
