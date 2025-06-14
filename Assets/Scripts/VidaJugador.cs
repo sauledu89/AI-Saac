@@ -61,8 +61,22 @@ public class VidaJugador : MonoBehaviour
         }
     }
 
+    /* void ReiniciarEscena()
+     {
+         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+         SceneManager.LoadScene(currentSceneIndex);
+     }
+    */
     void ReiniciarEscena()
     {
+        // Encontrar el jefe si existe
+        BossEnemy boss = Object.FindFirstObjectByType<BossEnemy>();
+
+        if (boss != null)
+        {
+            boss.ResetearBoss();
+        }
+
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex);
     }

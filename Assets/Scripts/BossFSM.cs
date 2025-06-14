@@ -35,8 +35,24 @@ public class BossFSM : BaseFSM
         return idleState;
     }
 
-// Método privado para obtener el estado actual
-private BaseState GetCurrentState()
+    public void ForceToIdle()
+    {
+        if (idleState != null)
+        {
+            ChangeState(idleState);
+
+            // Opcionalmente reiniciamos variables de Phase2 si existiera
+            if (phase2State != null)
+            {
+                phase2State.ResetMovementCenter();
+            }
+        }
+    }
+
+
+
+    // Método privado para obtener el estado actual
+    private BaseState GetCurrentState()
     {
         var field = typeof(BaseFSM).GetField("_currentState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         return (BaseState)field.GetValue(this);

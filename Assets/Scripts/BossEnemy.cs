@@ -37,6 +37,10 @@ public class BossEnemy : MonoBehaviour
 
     private Vector3 posicionInicial;
 
+    [Header("Respawn")]
+    public Transform puntoRespawn; // El nuevo punto de respawn
+
+
     void Start()
     {
         vidaActual = vidaMaxima;
@@ -187,10 +191,101 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
     {
         Debug.Log("El Boss ha sido derrotado.");
 
-        // Opcional: Puedes aquí poner animación de muerte antes de desactivarlo
-        StartCoroutine(ProcesoMuerte());
+        // Desactivamos el boss temporalmente
+        gameObject.SetActive(false);
+
+        // Reposicionamos en el punto de respawn
+        if (puntoRespawn != null)
+        {
+            transform.position = puntoRespawn.position;
+        }
+        else
+        {
+            Debug.LogWarning("BossEnemy: No se asignó un punto de respawn.");
+        }
+
+        // Resetear vida y estado
+        vidaActual = vidaMaxima;
+        estaEnFase2 = false;
+        esInvulnerable = true;
+
+        // Resetear color si cambió
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = colorNormal;
+        }
+
+        // Resetear FSM completamente a Idle
+        var fsm = GetComponent<BossFSM>();
+        if (fsm != null)
+        {
+            fsm.ForceToIdle(); // 🚀 LLAMAMOS a una nueva función que vamos a crear
+        }
+
+        // Finalmente reactivar el boss
+        gameObject.SetActive(true);
     }
 
+    public void ResetearBoss()
+    {
+        // Resetear posición
+        transform.position = posicionInicial;
+
+        // Resetear vida
+        vidaActual = vidaMaxima;
+        esInvulnerable = true;
+        estaEnFase2 = false;
+
+        // Resetear color
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = colorNormal;
+        }
+
+        // Resetear estado FSM al Idle
+        BossFSM fsm = GetComponent<BossFSM>();
+        if (fsm != null)
+        {
+            fsm.ForceToIdle(); // Cambiar a estado Idle de nuevo
+        }
+    }
+
+    /// <summary>
+    /// Hace que el Boss vuelva a su posición inicial después de un tiempo.
+    /// </summary>
+    public void VolverAPosicionInicialDespuesDeUnTiempo()
+    {
+        StartCoroutine(VolverAPosicionInicialCoroutine());
+    }
+
+    private IEnumerator VolverAPosicionInicialCoroutine()
+    {
+        yield return new WaitForSeconds(5f); // ⏳ Aumentamos a 5 segundos de vulnerabilidad (antes 3)
+
+        // Volver a la altura inicial
+        transform.position = new Vector3(posicionInicial.x, posicionInicial.y, posicionInicial.z);
+
+        // Volver a ser invulnerable
+        esInvulnerable = true;
+
+        // Restaurar color normal
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = colorNormal;
+        }
+    }
+
+
+    /// <summary>
+    /// Cambia el color del Boss para indicar que está vulnerable.
+    /// </summary>
+    public void CambiarColorAVulnerable()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = new Color(1f, 0.5f, 0.5f, 1f); // Un tono rojo claro
+        }
+    }
     private IEnumerator ProcesoMuerte()
     {
         // (Opcional) Espera un pequeño tiempo si quieres animaciones

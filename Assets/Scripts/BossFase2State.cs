@@ -178,4 +178,10 @@ public class BossPhase2State : BaseState
             bala.transform.right = Vector3.down;
         }
     }
+    public void ResetMovementCenter()
+    {
+        centroMovimiento = Vector2.zero;
+        anguloMovimiento = 0f;
+    }
+
 }

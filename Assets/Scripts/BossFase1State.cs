@@ -118,22 +118,22 @@ public class BossPhase1State : BaseState
 
     private void LanzarMisiles()
     {
-        if (_bossOwner.puntosDisparo.Length >= 2)
+        if (_bossOwner.puntosDisparo.Length >= 1)
         {
-            GameObject misilIzquierda = GameObject.Instantiate(_bossOwner.misilPrefab, _bossOwner.puntosDisparo[0].position, Quaternion.identity);
-            GameObject misilDerecha = GameObject.Instantiate(_bossOwner.misilPrefab, _bossOwner.puntosDisparo[1].position, Quaternion.identity);
+            GameObject misil = GameObject.Instantiate(_bossOwner.misilPrefab, _bossOwner.puntosDisparo[0].position, Quaternion.identity);
 
-            Rigidbody2D rb1 = misilIzquierda.GetComponent<Rigidbody2D>();
-            Rigidbody2D rb2 = misilDerecha.GetComponent<Rigidbody2D>();
-
-            if (rb1 != null) rb1.AddTorque(50f, ForceMode2D.Force);
-            if (rb2 != null) rb2.AddTorque(-50f, ForceMode2D.Force);
+            Rigidbody2D rb = misil.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.AddTorque(50f, ForceMode2D.Force);
+            }
         }
         else
         {
-            Debug.LogWarning("BossEnemy: No hay suficientes puntos de disparo para los misiles.");
+            Debug.LogWarning("BossEnemy: No hay suficientes puntos de disparo para el misil.");
         }
     }
+
 
     private void SpawnearEnemigos()
     {
@@ -145,5 +145,23 @@ public class BossPhase1State : BaseState
         {
             Debug.LogWarning("BossEnemy: No hay prefab o punto de spawn de enemigos extra asignado.");
         }
+    
+
+    // 1. Hacer vulnerable
+    _bossOwner.esInvulnerable = false;
+
+        // 2. Bajar posición visualmente
+        _bossOwner.transform.position = new Vector3(
+            _bossOwner.transform.position.x,
+            _bossOwner.transform.position.y - 2f, // Ajusta si quieres bajarlo más o menos
+            _bossOwner.transform.position.z
+        );
+
+        // 3. Cambiar color a vulnerable
+        _bossOwner.CambiarColorAVulnerable();
+
+        // 4. Programar que después de unos segundos regrese a su posición
+        _bossOwner.VolverAPosicionInicialDespuesDeUnTiempo();
     }
+
 }
