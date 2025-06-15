@@ -246,6 +246,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bb95db77acef5e409fa3341cc23382f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  vidaMaxima: 3
+  vidaActual: 0
   radioDeteccion: 40
   radioVisionLejana: 100
   capaJugador:

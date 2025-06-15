@@ -167,7 +167,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocidad: 30
   velocidadRotacion: 200
-  vidaMisil: 20
+  vidaMisil: 3
   tiempoMaximoVida: 10
   capasBalasJugador:
     serializedVersion: 2
