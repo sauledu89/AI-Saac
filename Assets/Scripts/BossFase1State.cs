@@ -180,27 +180,46 @@ public class BossPhase1State : BaseState
     {
         Color colorHorda = coloresHorda[rondaActual];
         int cantidad = subOleada;
-        Vector3 centro = _bossOwner.transform.position;
 
+        // Verifica que hay puntos disponibles suficientes
+        if (_bossOwner.puntosSpawnEnemigos.Length == 0)
+        {
+            Debug.LogWarning("No hay puntos de spawn asignados para enemigos.");
+            return;
+        }
+
+        // Mezclar los puntos de spawn (Fisher–Yates Shuffle)
+        List<Transform> puntosDisponibles = new List<Transform>(_bossOwner.puntosSpawnEnemigos);
+        for (int i = 0; i < puntosDisponibles.Count; i++)
+        {
+            Transform temp = puntosDisponibles[i];
+            int randomIndex = Random.Range(i, puntosDisponibles.Count);
+            puntosDisponibles[i] = puntosDisponibles[randomIndex];
+            puntosDisponibles[randomIndex] = temp;
+        }
+
+        // Limitar cantidad si hay menos puntos que enemigos a generar
+        cantidad = Mathf.Min(cantidad, puntosDisponibles.Count);
+
+        // Spawnear enemigos en los primeros puntos únicos mezclados
         for (int i = 0; i < cantidad; i++)
         {
-            Vector3 posicionSpawn = centro + new Vector3(
-                Random.Range(-rangoSpawnX, rangoSpawnX),
-                Random.Range(-rangoSpawnY, rangoSpawnY),
-                0f
-            );
+            Transform punto = puntosDisponibles[i];
+            if (punto == null) continue;
+
+            Vector3 posicionSpawn = punto.position;
 
             GameObject enemigoGO = GameObject.Instantiate(_bossOwner.enemigoExtraPrefab, posicionSpawn, Quaternion.identity);
+
             SpriteRenderer sr = enemigoGO.GetComponent<SpriteRenderer>();
             if (sr != null) sr.color = colorHorda;
 
             BaseEnemy baseScript = enemigoGO.GetComponent<BaseEnemy>();
             if (baseScript != null && !BaseEnemy.EnemigosVivos.Contains(baseScript))
             {
-                baseScript.EstablecerColorPorRonda(colorHorda); //Asignamos color persistente
+                baseScript.EstablecerColorPorRonda(colorHorda);
                 BaseEnemy.EnemigosVivos.Add(baseScript);
             }
-
         }
 
         _bossOwner.esInvulnerable = false;

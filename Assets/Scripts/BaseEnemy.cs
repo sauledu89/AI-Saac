@@ -27,6 +27,8 @@ public class BaseEnemy : MonoBehaviour
             Debug.LogError("No se encontró un SpriteRenderer en " + gameObject.name);
         }
 
+        gameObject.layer = LayerMask.NameToLayer("Enemy");
+
         // Registrar en lista de enemigos activos
         if (!EnemigosVivos.Contains(this))
             EnemigosVivos.Add(this);

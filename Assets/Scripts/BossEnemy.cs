@@ -4,7 +4,7 @@ using System.Collections;
 
 /// <summary>
 /// Script de control general del Boss Globo.
-/// Guarda todas las variables p�blicas y funciones que los estados necesitar�n.
+/// Guarda todas las variables publicas y funciones que los estados necesitaran.
 /// </summary>
 public class BossEnemy : MonoBehaviour
 {
@@ -26,12 +26,15 @@ public class BossEnemy : MonoBehaviour
     public float tiempoEntreMisiles = 6f;
     public float tiempoEntreSpawns = 8f;
 
+    [Header("Puntos de Spawn para enemigos")]
+    public Transform[] puntosSpawnEnemigos;
+
     [Header("Otros Efectos")]
     public GameObject iconoAdvertenciaPrefab; // Prefab del signo de admiraci�n
-    public Transform puntoIcono;               // D�nde aparece el icono
+    public Transform puntoIcono;               // Donde aparece el icono
     public Color colorNormal = Color.white;
     public Color colorFase2 = Color.red;
-    public float tiempoSacudidaFase2 = 2f; // Cu�nto tiempo se sacude antes de entrar a Fase 2
+    public float tiempoSacudidaFase2 = 2f; // Cuanto tiempo se sacude antes de entrar a Fase 2
 
     private SpriteRenderer spriteRenderer; // Referencia para cambiar color
 
@@ -61,14 +64,14 @@ public class BossEnemy : MonoBehaviour
     /// </summary>
     public void RecibirDaño(int cantidad)
     {
-        if (esInvulnerable) return; // No recibe da�o si es invulnerable
+        if (esInvulnerable) return; // No recibe daño si es invulnerable
 
         vidaActual -= cantidad;
         vidaActual = Mathf.Max(vidaActual, 0);
 
         if (!estaEnFase2 && vidaActual <= vidaMaxima / 2)
         {
-            // Si baj� al 50%, entra en Fase 2
+            // Si baja al 50%, entra en Fase 2
             EntrarFase2();
         }
 
@@ -87,7 +90,7 @@ public class BossEnemy : MonoBehaviour
     }
 
     /// <summary>
-    /// Transici�n visual y de l�gica hacia la fase 2.
+    /// Transicion visual y de l�gica hacia la fase 2.
     /// </summary>
     private void EntrarFase2()
     {
@@ -128,13 +131,13 @@ public void DisparoBasico(GameObject objetivo)
 
 private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
 {
-    // 1. Mostrar el �cono de advertencia
+    // 1. Mostrar el icono de advertencia
     GameObject icono = Instantiate(iconoAdvertenciaPrefab, puntoIcono.position, Quaternion.identity, transform);
 
     // 2. Esperar 1.5 segundos
     yield return new WaitForSeconds(1.5f);
 
-    // 3. Destruir el �cono
+    // 3. Destruir el icono
     Destroy(icono);
 
     // 4. Lanzar balas desde todos los puntos de disparo
@@ -142,7 +145,7 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
     {
         if (punto == null) continue;
 
-        // Calcular direcci�n hacia el jugador
+        // Calcular direccion hacia el jugador
         Vector2 direccion = (objetivo.transform.position - punto.position).normalized;
 
         // Instanciar bala
