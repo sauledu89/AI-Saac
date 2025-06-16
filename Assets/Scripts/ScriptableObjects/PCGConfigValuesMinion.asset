@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2aa2bfc770d6efb43bfaa65aed5bbc2c, type: 3}
+  m_Name: PCGConfigValuesMinion
+  m_EditorClassIdentifier: 
+  MinHp: 1
+  MaxHp: 7
+  MinDamage: 0.1
+  MaxDamage: 1000
+  MinAttackRate: 10
+  MaxAttackRate: 0.05
+  MinAttackRange: 0.1
+  MaxAttackRange: 100
+  MinMovementSpeed: 0
+  MaxMovementSpeed: 100
+  HpRange: 0
+  DamageRange: 0
+  AttackRateRange: 0
+  AttackRangeRange: 0
+  MovementSpeedRange: 0
+  StepCount: 1
+  HpStepDistance: 0
+  DamageStepDistance: 0
+  AttackRateStepDistance: 0
+  AttackRangeStepDistance: 0
+  MovementSpeedStepDistance: 0
