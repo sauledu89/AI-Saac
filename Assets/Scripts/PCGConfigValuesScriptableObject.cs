@@ -13,6 +13,8 @@ public class PCGConfigValuesScriptableObject : ScriptableObject
     public float MaxAttackRange = 100;
     public float MinMovementSpeed = 0.0f;
     public float MaxMovementSpeed = 100;
+    public float MinTotalDifficulty = 10f;
+    public float MaxTotalDifficulty = 100f;
 
     public float HpRange;
     public float DamageRange;
@@ -28,8 +30,6 @@ public class PCGConfigValuesScriptableObject : ScriptableObject
     public float AttackRateStepDistance;
     public float AttackRangeStepDistance;
     public float MovementSpeedStepDistance;
-
-
 
     public void Initialize()
     {

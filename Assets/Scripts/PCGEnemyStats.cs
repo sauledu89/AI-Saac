@@ -1,106 +1,106 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.InputSystem.Controls;
 using Random = UnityEngine.Random;
 
-// importante que NO herede de Monobehavior para que podamos hacerle New.
 public class PCGEnemyStats
 {
     public float HP;
     public float Damage;
-    public float AttackRate; // lo mínimo es 1 vez cada 5 segundos y lo máximo es 10 por segundo.
+    public float AttackRate;
     public float AttackRange;
     public float MovementSpeed;
 
-    private PCGConfigValuesScriptableObject _configValuesScriptableObject;
+    private PCGConfigValuesScriptableObject _config;
 
-
-    public PCGEnemyStats(PCGConfigValuesScriptableObject configValuesScriptableObject)
+    public PCGEnemyStats(PCGConfigValuesScriptableObject config)
     {
-        _configValuesScriptableObject = configValuesScriptableObject;
-        HP = Random.Range(_configValuesScriptableObject.MinHp, _configValuesScriptableObject.MaxHp);
-        Damage = Random.Range(_configValuesScriptableObject.MinDamage, _configValuesScriptableObject.MaxDamage);
-        AttackRate = Random.Range(_configValuesScriptableObject.MinAttackRate, _configValuesScriptableObject.MaxAttackRate);
-        AttackRange = Random.Range(_configValuesScriptableObject.MinAttackRange, _configValuesScriptableObject.MaxAttackRange);
-        MovementSpeed = Random.Range(_configValuesScriptableObject.MinMovementSpeed, _configValuesScriptableObject.MaxMovementSpeed);
+        _config = config;
+        HP = Random.Range(config.MinHp, config.MaxHp);
+        Damage = Random.Range(config.MinDamage, config.MaxDamage);
+        AttackRate = Random.Range(config.MinAttackRate, config.MaxAttackRate);
+        AttackRange = Random.Range(config.MinAttackRange, config.MaxAttackRange);
+        MovementSpeed = Random.Range(config.MinMovementSpeed, config.MaxMovementSpeed);
+    }
+
+    public PCGEnemyStats(PCGEnemyStats other)
+    {
+        HP = other.HP;
+        Damage = other.Damage;
+        AttackRate = other.AttackRate;
+        AttackRange = other.AttackRange;
+        MovementSpeed = other.MovementSpeed;
+        _config = other._config;
     }
 
     public void PrintStats()
     {
-        Debug.Log($"los stats de esta unidad son: HP = {HP}, Damage: {Damage}, AttackRate: {AttackRate}, AttackRange: {AttackRange}, MovementSpeed: {MovementSpeed}");
+        Debug.Log($"HP = {HP}, Damage = {Damage}, AttackRate = {AttackRate}, AttackRange = {AttackRange}, MovementSpeed = {MovementSpeed}");
     }
 
-    // Constructor para copiar valores
-    public PCGEnemyStats(PCGEnemyStats entity)
+    // NORMALIZACIÓN
+    private float Normalize(float value, float min, float max)
     {
-        HP = entity.HP;
-        Damage = entity.Damage;
-        AttackRate = entity.AttackRate;
-        AttackRange = entity.AttackRange;
-        MovementSpeed = entity.MovementSpeed;
-        _configValuesScriptableObject = entity._configValuesScriptableObject;
+        return (value - min) / (max - min);
     }
 
-    // tipo de movimiento, por ejemplo, que te persiga, que huya, que no se mueva, que se mueva en zig-zag, que patrulle un área, etc.
-    // enum de tipo de movimiento
+    public float NormalizedHP => Normalize(HP, _config.MinHp, _config.MaxHp);
+    public float NormalizedDamage => Normalize(Damage, _config.MinDamage, _config.MaxDamage);
+    public float NormalizedAttackRate => Normalize(AttackRate, _config.MinAttackRate, _config.MaxAttackRate);
+    public float NormalizedAttackRange => Normalize(AttackRange, _config.MinAttackRange, _config.MaxAttackRange);
+    public float NormalizedMovementSpeed => Normalize(MovementSpeed, _config.MinMovementSpeed, _config.MaxMovementSpeed);
 
-    // efecto especial que te aplica al golpearte, por ejemplo, que te stunee, que te queme, envenene, paralice, etc.
-    // enum de tipo de efecto especial.
-
-    public float GetDifficultyV1()
+    // FUNCIÓN DE DIFICULTAD V2
+    public float GetDifficultyV2()
     {
-        return HP + Damage + AttackRate + AttackRange + MovementSpeed;
+        return HP + (Damage * (1f / AttackRate)) + AttackRange + MovementSpeed;
     }
 
-    // Vamos a poner que hay 10 pasos por eje.
+    // FUNCIÓN DE BALANCE
+    public float GetBalanceScore()
+    {
+        float sum = (NormalizedHP - 0.5f) +
+                    (NormalizedDamage - 0.5f) +
+                    (NormalizedAttackRate - 0.5f) +
+                    (NormalizedAttackRange - 0.5f) +
+                    (NormalizedMovementSpeed - 0.5f);
+
+        return 1f - Mathf.Abs(Mathf.Clamp(sum, -1f, 1f));
+    }
+
+    // FUNCIÓN TOTAL
+    public float GetTotalScore(float difficultyWeight, float balanceWeight)
+    {
+        float difficultyScore = Normalize(GetDifficultyV2(), _config.MinTotalDifficulty, _config.MaxTotalDifficulty);
+        float balanceScore = GetBalanceScore();
+        return difficultyScore * difficultyWeight + balanceScore * balanceWeight;
+    }
+
+    // GENERAR VECINOS
     public List<PCGEnemyStats> GetNeighbors()
     {
         List<PCGEnemyStats> result = new List<PCGEnemyStats>();
-        // metemos en result los vecinos de cada eje de nuestro enemigo.
 
-        // todo el rango de HP se divide entre el número de pasos a dar en ese eje.
-        // ahorita es del 1 al 100
-        // si nuestro original ahorita está en 50 de HP., entonces los vecinos sería 59.9 y 40.1.
+        void AddNeighbor(string fieldName, float currentValue, float step, float min, float max)
+        {
+            float minus = Mathf.Max(currentValue - step, min);
+            float plus = Mathf.Min(currentValue + step, max);
 
-        // Eje HP.
-        PCGEnemyStats neighborHPMinus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborHPMinus.HP = math.max(neighborHPMinus.HP - _configValuesScriptableObject.HpStepDistance, _configValuesScriptableObject.MinHp); // que lo mínimo que pueda tener sea el mínimo del rango.
-        result.Add(neighborHPMinus);
+            PCGEnemyStats statMinus = new PCGEnemyStats(this);
+            statMinus.GetType().GetField(fieldName).SetValue(statMinus, minus);
+            result.Add(statMinus);
 
-        PCGEnemyStats neighborHPPlus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborHPPlus.HP = math.min(neighborHPPlus.HP + _configValuesScriptableObject.HpStepDistance, _configValuesScriptableObject.MaxHp);
-        result.Add(neighborHPPlus);
+            PCGEnemyStats statPlus = new PCGEnemyStats(this);
+            statPlus.GetType().GetField(fieldName).SetValue(statPlus, plus);
+            result.Add(statPlus);
+        }
 
-        // si nos fuéramos a salir del rango de ese eje, hay de dos: o lo limitas al rango o lo descartas
-        // ahorita vamos a limitarlo al rango.
-
-        // Eje Damage.
-        PCGEnemyStats neighborDamageMinus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborDamageMinus.Damage = math.max(neighborDamageMinus.Damage - _configValuesScriptableObject.DamageStepDistance, _configValuesScriptableObject.MinDamage); // que lo mínimo que pueda tener sea el mínimo del rango.
-        result.Add(neighborDamageMinus);
-
-        PCGEnemyStats neighborDamagePlus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborDamagePlus.Damage = math.min(neighborDamagePlus.Damage + _configValuesScriptableObject.DamageStepDistance, _configValuesScriptableObject.MaxDamage);
-        result.Add(neighborDamagePlus);
-
-        // Eje Attack Rate.
-        PCGEnemyStats neighborAttackRateMinus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborAttackRateMinus.AttackRate = math.max(neighborAttackRateMinus.AttackRate - _configValuesScriptableObject.AttackRateStepDistance, _configValuesScriptableObject.MinAttackRate); // que lo mínimo que pueda tener sea el mínimo del rango.
-        result.Add(neighborAttackRateMinus);
-
-        PCGEnemyStats neighborAttackRatePlus = new PCGEnemyStats(this); // va a tener lo mismo en todas las características, excepto en HP.
-        neighborAttackRatePlus.AttackRate = math.min(neighborAttackRatePlus.AttackRate + _configValuesScriptableObject.AttackRateStepDistance, _configValuesScriptableObject.MaxAttackRate);
-        result.Add(neighborAttackRatePlus);
-
-
-        // FALTAN ATTACK RANGE Y MOVEMENT SPEED.
-
-
+        AddNeighbor(nameof(HP), HP, _config.HpStepDistance, _config.MinHp, _config.MaxHp);
+        AddNeighbor(nameof(Damage), Damage, _config.DamageStepDistance, _config.MinDamage, _config.MaxDamage);
+        AddNeighbor(nameof(AttackRate), AttackRate, _config.AttackRateStepDistance, _config.MinAttackRate, _config.MaxAttackRate);
+        AddNeighbor(nameof(AttackRange), AttackRange, _config.AttackRangeStepDistance, _config.MinAttackRange, _config.MaxAttackRange);
+        AddNeighbor(nameof(MovementSpeed), MovementSpeed, _config.MovementSpeedStepDistance, _config.MinMovementSpeed, _config.MaxMovementSpeed);
 
         return result;
-
     }
-
-
 }

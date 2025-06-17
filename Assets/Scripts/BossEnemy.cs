@@ -6,11 +6,14 @@ using System.Collections;
 /// Script de control general del Boss Globo.
 /// Guarda todas las variables publicas y funciones que los estados necesitaran.
 /// </summary>
+
 public class BossEnemy : MonoBehaviour
 {
     [Header("Configuraciones Generales")]
     public int vidaMaxima = 100;
     [HideInInspector] public int vidaActual;
+
+    public PCGConfigValuesScriptableObject configValues;
 
     public bool esInvulnerable = true; // Al inicio, invulnerable
     public bool estaEnFase2 = false;   // Cambia cuando vida < 50% (o condici�n especial)
@@ -59,9 +62,8 @@ public class BossEnemy : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Llama esta funci�n cuando el boss recibe da�o.
-    /// </summary>
+    // Llama esta funcion cuando el boss recibe daño.
+
     public void RecibirDaño(int cantidad)
     {
         if (esInvulnerable) return; // No recibe daño si es invulnerable
@@ -81,17 +83,13 @@ public class BossEnemy : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Devuelve la vida actual como porcentaje (entre 0 y 1).
-    /// </summary>
+    // Devuelve la vida actual como porcentaje (entre 0 y 1).
     public float GetCurrentLifePercentage()
     {
         return (float)vidaActual / vidaMaxima;
     }
 
-    /// <summary>
-    /// Transicion visual y de l�gica hacia la fase 2.
-    /// </summary>
+    // Transicion visual y de l�gica hacia la fase 2.
     private void EntrarFase2()
     {
         estaEnFase2 = true;
@@ -104,9 +102,9 @@ public class BossEnemy : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Corutina para cambiar color durante la transici�n a Fase 2.
-    /// </summary>
+  
+    // Corutina para cambiar color durante la transici�n a Fase 2.
+
     private System.Collections.IEnumerator CambiarColorTemporariamente()
     {
         float tiempoPasado = 0f;
@@ -159,10 +157,7 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
         }
     }
 }
-    /// <summary>
-    /// Función general para mostrar el icono de advertencia y luego ejecutar un ataque.
-    /// </summary>
-    /// <param name="ataqueAccion">La función (acción) del ataque que queremos ejecutar después del aviso.</param>
+    
     public void LanzarAdvertenciaYAtacar(System.Action ataqueAccion)
     {
         StartCoroutine(ProcesoAdvertencia(ataqueAccion));
@@ -184,12 +179,6 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
         ataqueAccion?.Invoke();
     }
 
-    /// <summary>
-    /// Muerte del jefe.
-    /// </summary>
-    /// <summary>
-    /// Muerte del jefe.
-    /// </summary>
     private void Morir()
     {
         Debug.Log("El Boss ha sido derrotado.");
@@ -253,9 +242,9 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
         }
     }
 
-    /// <summary>
-    /// Hace que el Boss vuelva a su posición inicial después de un tiempo.
-    /// </summary>
+   
+    // Hace que el Boss vuelva a su posición inicial después de un tiempo.
+   
     public void VolverAPosicionInicialDespuesDeUnTiempo()
     {
         StartCoroutine(VolverAPosicionInicialCoroutine());
@@ -278,10 +267,8 @@ private IEnumerator DisparoBasicoCoroutine(GameObject objetivo)
         }
     }
 
-
-    /// <summary>
-    /// Cambia el color del Boss para indicar que está vulnerable.
-    /// </summary>
+    // Cambia el color del Boss para indicar que está vulnerable.
+    
     public void CambiarColorAVulnerable()
     {
         if (spriteRenderer != null)

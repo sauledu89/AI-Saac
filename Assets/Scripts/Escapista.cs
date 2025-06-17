@@ -1,20 +1,21 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-
-public class Escapista : MonoBehaviour
+/// <summary>
+/// Este enemigo se comporta de forma evasiva (huye del jugador si está cerca),
+/// puede disparar proyectiles, y entra en un estado de cansancio si huye por mucho tiempo.
+/// comportamiento reactivo con estados (Activo/Cansado), navegación con NavMesh,
+/// y generación de características con dificultad/balance calculado mediante Greedy Search.
+/// El color del enemigo representa su nivel de vida inicial (cyan, naranja o rojo),
+/// </summary>
+public class Escapista : BaseEnemy
 {
-    [Header("Vida")]
-    public int vidaMaxima = 3;
-    public int vidaActual;
 
-    private SpriteRenderer spriteRenderer;
-    private Color colorOriginal; //Guardamos el color de dificultad asignado
+    private Color colorOriginal;
 
     [Header("Configuración de Visión")]
     public float radioDeteccion = 5f;
     public float radioVisionLejana = 10f;
-    public LayerMask capaJugador;
     public LayerMask capaObstaculos;
     public float velocidadRotacion = 5f;
 
@@ -34,15 +35,39 @@ public class Escapista : MonoBehaviour
 
     [Header("Disparo")]
     public GameObject balaEnemigo;
-    public float fireRateActivo = 1f;
-    public float fireRateCansado = 1.5f;
-    private float tiempoUltimoDisparo;
     public float errorPunteriaCansado = 10f;
+    private float tiempoUltimoDisparo;
 
     private Vector3 GizmoPosicionFlee = Vector3.zero;
 
-    void Start()
+    private PCGEnemyStats stats;
+    private void Awake()
     {
+        agente = GetComponent<NavMeshAgent>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    public void SetStats(PCGEnemyStats newStats)
+    {
+        // Asignamos estadísticas generadas por IA (HP, velocidad, daño, etc.)
+        stats = newStats;
+
+        vidaMaxima = Mathf.RoundToInt(stats.HP);
+        vidaActual = vidaMaxima;
+
+        if (agente != null)
+            agente.speed = stats.MovementSpeed;
+
+        // Aplicamos color visual según la vida inicial del enemigo
+        Color color = ObtenerColorPorHP(vidaMaxima);
+        EstablecerColorPorRonda(color);
+    }
+
+
+    protected override void Start()
+    {
+        base.Start();
+
         agente = GetComponent<NavMeshAgent>();
         if (agente != null)
         {
@@ -51,17 +76,12 @@ public class Escapista : MonoBehaviour
         }
 
         if (iconoAlerta != null)
-        {
             iconoAlerta.SetActive(false);
-        }
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null)
-        {
-            colorOriginal = spriteRenderer.color; //Guardamos color inicial (dificultad)
-        }
+       // spriteRenderer = GetComponent<SpriteRenderer>();
+       // if (spriteRenderer != null)
+       //     colorOriginal = spriteRenderer.color;
 
-        vidaActual = vidaMaxima;
     }
 
     void Update()
@@ -74,16 +94,25 @@ public class Escapista : MonoBehaviour
                 if (objetivoJugador != null)
                 {
                     ComportamientoActivo();
-                    Disparar(fireRateActivo, 0f);
+                    Disparar(0f); // sin error
                 }
                 break;
 
             case EstadoEscapista.Cansado:
-                Disparar(fireRateCansado, errorPunteriaCansado);
+                Disparar(errorPunteriaCansado); // con error
                 break;
         }
     }
 
+    private Color ObtenerColorPorHP(int hp)
+    {
+        if (hp <= 2)
+            return Color.cyan;
+        else if (hp <= 4)
+            return new Color(1f, 0.5f, 0f); // Naranja
+        else
+            return Color.red;
+    }
     void DetectarJugador()
     {
         Collider2D jugadorDetectado = Physics2D.OverlapCircle(transform.position, radioVisionLejana, capaJugador);
@@ -139,9 +168,13 @@ public class Escapista : MonoBehaviour
         }
     }
 
-    void Disparar(float fireRate, float errorPunteria)
+    void Disparar(float errorPunteria)
     {
-        if (Time.time > fireRate + tiempoUltimoDisparo && objetivoJugador != null)
+        if (stats == null || objetivoJugador == null) return;
+
+        float fireRate = stats.AttackRate;
+
+        if (Time.time > tiempoUltimoDisparo + fireRate)
         {
             tiempoUltimoDisparo = Time.time;
 
@@ -150,7 +183,13 @@ public class Escapista : MonoBehaviour
             float angulo = Mathf.Atan2(direccionJugador.y, direccionJugador.x) * Mathf.Rad2Deg + anguloError;
 
             Quaternion rotacionBala = Quaternion.Euler(0, 0, angulo);
-            Instantiate(balaEnemigo, transform.position, rotacionBala);
+            GameObject bala = Instantiate(balaEnemigo, transform.position, rotacionBala);
+
+            if (bala.TryGetComponent(out EnemyBullet balaScript))
+
+            {
+                balaScript.SetDamage(Mathf.RoundToInt(stats.Damage));
+            }
         }
     }
 
@@ -161,8 +200,7 @@ public class Escapista : MonoBehaviour
         Vector3 direccionAlejarse = (transform.position - objetivoJugador.position).normalized;
         Vector3 puntoHuida = transform.position + direccionAlejarse * radioDeteccion * 2;
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(puntoHuida, out hit, radioDeteccion * 2, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(puntoHuida, out NavMeshHit hit, radioDeteccion * 2, NavMesh.AllAreas))
         {
             agente.SetDestination(hit.position);
             GizmoPosicionFlee = hit.position;
@@ -183,9 +221,7 @@ public class Escapista : MonoBehaviour
         }
 
         if (rutinaCansancio == null)
-        {
             rutinaCansancio = StartCoroutine(IniciarCansancio());
-        }
     }
 
     IEnumerator IniciarCansancio()
@@ -235,7 +271,7 @@ public class Escapista : MonoBehaviour
         {
             spriteRenderer.color = Color.white;
             yield return new WaitForSeconds(0.1f);
-            spriteRenderer.color = colorOriginal; //Regresa al color original (verde/amarillo/rojo)
+            spriteRenderer.color = colorOriginal;
             yield return new WaitForSeconds(0.1f);
         }
     }
@@ -260,4 +296,10 @@ public class Escapista : MonoBehaviour
             Gizmos.DrawSphere(GizmoPosicionFlee, 1f);
         }
     }
+
+    public PCGEnemyStats GetStats()
+    {
+        return stats;
+    }
+
 }
