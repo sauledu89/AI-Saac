@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: PCGConfigValuesBoss
   m_EditorClassIdentifier: 
   MinHp: 1
-  MaxHp: 1000
-  MinDamage: 0.1
-  MaxDamage: 1000
-  MinAttackRate: 10
-  MaxAttackRate: 0.05
+  MaxHp: 6
+  MinDamage: 0.5
+  MaxDamage: 1
+  MinAttackRate: 2
+  MaxAttackRate: 0.5
   MinAttackRange: 0.1
   MaxAttackRange: 100
   MinMovementSpeed: 0
